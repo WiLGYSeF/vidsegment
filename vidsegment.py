@@ -21,7 +21,12 @@ class Segment:
         self.filename: Optional[str] = filename
         self.origin: Optional[str] = origin
 
-def split_video(dest_path: str, filename: str, segments: Iterable[Segment], overwrite: bool = False) -> None:
+def split_video(
+    dest_path: str,
+    filename: str,
+    segments: Iterable[Segment],
+    overwrite: bool = False
+) -> None:
     _, extension = os.path.splitext(filename)
 
     for segment in segments:
@@ -34,7 +39,7 @@ def split_video(dest_path: str, filename: str, segments: Iterable[Segment], over
             '-c', 'copy',
             '-ss', str(segment.start),
             '-to', str(segment.end),
-            '-y' if overwrite else '-n'
+            '-y' if overwrite else '-n',
         ]
         if segment.origin is not None:
             arguments.extend(['-metadata', f'comment={segment.origin}'])
@@ -48,6 +53,8 @@ def split_video(dest_path: str, filename: str, segments: Iterable[Segment], over
             if process.returncode != 0:
                 print(stderr.decode('utf-8'), file=sys.stderr)
                 raise RuntimeError()
+
+            print(f'Wrote "{escape_quote(segment.title)}": {dest_filepath}')
 
 def load_segments(filename: str) -> List[Segment]:
     with open(filename, 'r') as file:
@@ -64,6 +71,9 @@ def load_segments(filename: str) -> List[Segment]:
         ))
 
     return segments
+
+def escape_quote(string: str) -> str:
+    return string.replace('\\', '\\\\').replace('"', '\\"')
 
 if __name__ == '__main__':
     input_video = sys.argv[1]
