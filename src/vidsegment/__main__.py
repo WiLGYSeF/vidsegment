@@ -3,9 +3,11 @@
 import os
 import subprocess
 import sys
-from typing import Iterable, List, Optional
+from typing import Collection, Iterable, List, Optional
 
 import yaml
+
+from utils.time_to_seconds import time_to_seconds
 
 class Segment:
     def __init__(self,
@@ -29,9 +31,15 @@ def split_video(
 ) -> None:
     _, extension = os.path.splitext(filename)
 
+    # TODO: audio-only option
+    # TODO: print stdout option
+    # TODO: metadata
+
     for segment in segments:
         dest_filename = segment.filename if segment.filename is not None else segment.title + extension
         dest_filepath = os.path.join(dest_path, dest_filename)
+
+        # TODO: optimize?
 
         arguments = [
             'ffmpeg',
@@ -52,22 +60,46 @@ def split_video(
             _, stderr = process.communicate()
             if process.returncode != 0:
                 print(stderr.decode('utf-8'), file=sys.stderr)
+                # TODO: aggregate exception option
                 raise RuntimeError()
+
+            # TODO: better output
 
             print(f'Wrote "{escape_quote(segment.title)}": {dest_filepath}')
 
 def load_segments(filename: str) -> List[Segment]:
     with open(filename, 'r') as file:
         data = yaml.safe_load(file.read())
-    
+
+    origin = data.get('origin')
+
+    # TODO: segment
+    """
+    prefix: value
+    suffix: value
+    filename: template
+    metadata:
+      - key: value
+    """
+
     segments = []
     for segment in data['segments']:
+        if ':' in segment['start']:
+            start = time_to_seconds(segment['start'])
+        else:
+            start = float(segment['start'])
+
+        if ':' in segment['end']:
+            end = time_to_seconds(segment['end'])
+        else:
+            end = float(segment['end'])
+
         segments.append(Segment(
-            segment['start'],
-            segment['end'],
+            start,
+            end,
             segment['title'],
             segment.get('filename'),
-            segment.get('origin'),
+            segment.get('origin', origin),
         ))
 
     return segments
@@ -75,10 +107,18 @@ def load_segments(filename: str) -> List[Segment]:
 def escape_quote(string: str) -> str:
     return string.replace('\\', '\\\\').replace('"', '\\"')
 
-if __name__ == '__main__':
-    input_video = sys.argv[1]
-    input_segments = sys.argv[2]
-    output_path = sys.argv[3]
+def main(args: Collection[str]):
+    input_video = args[0]
+    input_segments = args[1]
+    output_path = args[2]
+
+    # TODO: template output filename
 
     segments = load_segments(input_segments)
     split_video(output_path, input_video, segments)
+
+def main_args():
+    main(sys.argv[1:])
+
+if __name__ == '__main__':
+    main_args()
