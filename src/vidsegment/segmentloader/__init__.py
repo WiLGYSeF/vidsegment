@@ -16,12 +16,12 @@ class SegmentLoader:
 
         segments = []
         for segment in data['segments']:
-            if ':' in segment['start']:
+            if isinstance(segment['start'], str) and ':' in segment['start']:
                 start = time_to_seconds(segment['start'])
             else:
                 start = float(segment['start'])
 
-            if ':' in segment['end']:
+            if isinstance(segment['end'], str) and ':' in segment['end']:
                 end = time_to_seconds(segment['end'])
             else:
                 end = float(segment['end'])
@@ -30,12 +30,16 @@ class SegmentLoader:
             if segment_filename is None:
                 raise ValueError('no filename for segment')
 
+            segment_volume = segment.get('volume', volume)
+            if segment_volume is not None:
+                segment_volume = str(segment_volume)
+
             segments.append(Segment(
                 start,
                 end,
-                segment['title'],
                 segment_filename,
-                segment.get('volume', volume),
+                segment.get('title'),
+                segment_volume,
                 segment.get('metadata', metadata),
             ))
 

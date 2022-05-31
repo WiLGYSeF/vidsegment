@@ -81,9 +81,11 @@ class VideoSplitter:
             'end_sec': str(segment.end),
             'duration': seconds_to_time(segment.start - segment.end),
             'duration_sec': str(segment.start - segment.end),
-            'title': segment.title,
             'extension': extension,
         }
+
+        if segment.title is not None:
+            substitutions['title'] = segment.title
 
         if segment.metadata is not None:
             for key, val in segment.metadata.items():
