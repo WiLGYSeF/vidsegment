@@ -9,7 +9,11 @@ def seconds_to_time(seconds: float) -> str:
     if len(result) == 0:
         result = '00:'
 
-    seconds = round(seconds, 3)
+    if int(seconds) != seconds:
+        seconds = round(seconds, 3)
+    else:
+        seconds = int(seconds)
+
     if seconds < 10:
         result += '0'
     result += str(seconds)
