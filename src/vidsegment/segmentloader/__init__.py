@@ -26,11 +26,15 @@ class SegmentLoader:
             else:
                 end = float(segment['end'])
 
+            segment_filename = segment.get('filename', filename_template)
+            if segment_filename is None:
+                raise ValueError('no filename for segment')
+
             segments.append(Segment(
                 start,
                 end,
                 segment['title'],
-                segment.get('filename', filename_template),
+                segment_filename,
                 segment.get('volume', volume),
                 segment.get('metadata', metadata),
             ))

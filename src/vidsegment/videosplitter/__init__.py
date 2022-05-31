@@ -14,7 +14,7 @@ class VideoSplitResult:
         filename: str
     ):
         self.success: bool = success
-        self.result: str = result,
+        self.result: str = result
         self.filename: str = filename
 
 class VideoSplitter:
@@ -38,9 +38,10 @@ class VideoSplitter:
                 'extension': extension,
             }
 
-            for key, val in segment.metadata.items():
-                if key not in substitutions:
-                    substitutions[key] = val
+            if segment.metadata is not None:
+                for key, val in segment.metadata.items():
+                    if key not in substitutions:
+                        substitutions[key] = val
 
             dest_filename = Template(segment.filename).substitute(substitutions)
             dest_filepath = os.path.join(dest_path, dest_filename)
@@ -66,11 +67,15 @@ class VideoSplitter:
 
             os.makedirs(os.path.dirname(dest_filepath), exist_ok=True)
 
-            with subprocess.Popen(arguments, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
+            with subprocess.Popen(
+                arguments,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            ) as process:
                 _, stderr = process.communicate()
                 if process.returncode != 0:
                     if not continue_on_fail:
                         raise RuntimeError(stderr)
-                    yield VideoSplitResult(False, stderr, dest_filepath)
+                    yield VideoSplitResult(False, stderr.decode('utf-8'), dest_filepath)
                 else:
                     yield VideoSplitResult(True, '', dest_filepath)

@@ -5,13 +5,13 @@ class Segment:
         start: float,
         end: float,
         title: str,
-        filename: Optional[str] = None,
+        filename: str,
         volume: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ):
         self.start: float = start
         self.end: float = end
         self.title: str = title
-        self.filename: Optional[str] = filename
+        self.filename: str = filename
         self.volume: Optional[str] = volume
         self.metadata: Optional[Dict[str, Any]] = metadata
