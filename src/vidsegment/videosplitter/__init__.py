@@ -1,9 +1,10 @@
 import os
 from string import Template
 import subprocess
-from typing import Generator, Iterable
+from typing import Dict, Generator, Iterable
 
 from ..segment import Segment
+from ..utils.seconds_to_time import seconds_to_time
 
 SEEK_OFFSET = 5
 
@@ -30,18 +31,7 @@ class VideoSplitter:
         extension = extension.lstrip('.')
 
         for segment in segments:
-            substitutions = {
-                'start': segment.start,
-                'end': segment.end,
-                'duration': segment.start - segment.end,
-                'title': segment.title,
-                'extension': extension,
-            }
-
-            if segment.metadata is not None:
-                for key, val in segment.metadata.items():
-                    if key not in substitutions:
-                        substitutions[key] = val
+            substitutions = self._get_substitutions(segment, extension)
 
             dest_filename = Template(segment.filename).substitute(substitutions)
             dest_filepath = os.path.join(dest_path, dest_filename)
@@ -59,7 +49,7 @@ class VideoSplitter:
                 arguments.extend(['-af', f'volume={segment.volume}'])
             if segment.metadata is not None:
                 for key, val in segment.metadata.items():
-                    arguments.extend(['-metadata', f'{key}={val}'])
+                    arguments.extend(['-metadata', f'{key}={Template(val).safe_substitute(substitutions)}'])
             if copy_video:
                 arguments.extend(['-c', 'copy'])
 
@@ -79,3 +69,25 @@ class VideoSplitter:
                     yield VideoSplitResult(False, stderr.decode('utf-8'), dest_filepath)
                 else:
                     yield VideoSplitResult(True, '', dest_filepath)
+
+    def _get_substitutions(self,
+        segment: Segment,
+        extension: str,
+    ) -> Dict[str, str]:
+        substitutions = {
+            'start': seconds_to_time(segment.start),
+            'start_sec': str(segment.start),
+            'end': seconds_to_time(segment.end),
+            'end_sec': str(segment.end),
+            'duration': seconds_to_time(segment.start - segment.end),
+            'duration_sec': str(segment.start - segment.end),
+            'title': segment.title,
+            'extension': extension,
+        }
+
+        if segment.metadata is not None:
+            for key, val in segment.metadata.items():
+                if key not in substitutions:
+                    substitutions[key] = val
+
+        return substitutions
