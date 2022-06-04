@@ -17,11 +17,15 @@ def main(args: List[str]):
     segments = segmentloader.load_yaml(input_segments)
 
     splitter = VideoSplitter()
-    for result in splitter.split_video(input_video, output_path, segments):
-        if result.success:
-            print(result.filename)
-        else:
-            print(result.result, file=sys.stderr)
+    try:
+        for result in splitter.split_video(input_video, output_path, segments):
+            if result.success:
+                print(result.filename)
+            else:
+                print(result.result, file=sys.stderr)
+    except RuntimeError as exc:
+        print(exc, file=sys.stderr)
+        sys.exit(1)
 
 def main_args():
     main(sys.argv[1:])

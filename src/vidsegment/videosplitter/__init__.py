@@ -48,6 +48,8 @@ class VideoSplitter:
             ]
             if segment.volume is not None:
                 arguments.extend(['-af', f'volume={segment.volume}'])
+            if segment.constant_rate_factor is not None:
+                arguments.extend(['-crf', str(segment.constant_rate_factor)])
             if segment.title is not None:
                 arguments.extend(['-metadata', f'title={segment.title}'])
             if segment.metadata is not None:
