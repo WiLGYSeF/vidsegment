@@ -1,6 +1,7 @@
 import os
 from string import Template
 import subprocess
+import sys
 from typing import Dict, Generator, Iterable
 
 from ..filename_slug import FilenameSlug
@@ -27,6 +28,7 @@ class VideoSplitter:
         overwrite: bool = False,
         copy_video: bool = False,
         continue_on_fail: bool = False,
+        verbose: bool = False,
     ) -> Generator[VideoSplitResult, None, None]:
         _, extension = os.path.splitext(filename)
         extension = extension.lstrip('.')
@@ -66,9 +68,10 @@ class VideoSplitter:
 
             with subprocess.Popen(
                 arguments,
-                stdout=subprocess.PIPE,
+                stdout=sys.stdout if verbose else subprocess.PIPE,
                 stderr=subprocess.PIPE
             ) as process:
+                # TODO: verbose mode
                 _, stderr = process.communicate()
                 if process.returncode != 0:
                     if not continue_on_fail:

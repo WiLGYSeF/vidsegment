@@ -1,24 +1,48 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 from typing import List
 
+from . import VERSION
+from . import argscli
 from .segmentloader import SegmentLoader
 from .videosplitter import VideoSplitter
 
 def main(args: List[str]):
-    # TODO: argparse
+    namespace, args = argscli.parse_args(args)
 
-    input_video = args[0]
-    input_segments = args[1]
-    output_path = args[2]
+    if namespace.version:
+        print(f'vidsegment v{VERSION}\n')
+
+        try:
+            os.system('ffmpeg -version')
+        except Exception as exc:
+            print(f'error: could not get ffmpeg version: {exc}')
+        sys.exit(0)
+
+    if len(args) == 0:
+        argscli.print_help()
+        sys.exit(1)
+
+    input_video = namespace.input
+    input_segments = namespace.segment
+    output_path = namespace.dest
 
     segmentloader = SegmentLoader()
     segments = segmentloader.load_yaml(input_segments)
 
     splitter = VideoSplitter()
     try:
-        for result in splitter.split_video(input_video, output_path, segments):
+        for result in splitter.split_video(
+            input_video,
+            output_path,
+            segments,
+            overwrite=namespace.overwrite,
+            copy_video=namespace.copy,
+            continue_on_fail=namespace.continue_on_fail,
+            verbose=namespace.verbose,
+        ):
             if result.success:
                 print(result.filename)
             else:
