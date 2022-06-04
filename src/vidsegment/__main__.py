@@ -7,6 +7,8 @@ from .segmentloader import SegmentLoader
 from .videosplitter import VideoSplitter
 
 def main(args: List[str]):
+    # TODO: argparse
+
     input_video = args[0]
     input_segments = args[1]
     output_path = args[2]

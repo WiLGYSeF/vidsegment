@@ -33,6 +33,7 @@ class VideoSplitter:
         for segment in segments:
             substitutions = self._get_substitutions(segment, extension)
 
+            # TODO: legalize filenames?
             dest_filename = Template(segment.filename).substitute(substitutions)
             dest_filepath = os.path.join(dest_path, dest_filename)
 
@@ -47,6 +48,8 @@ class VideoSplitter:
             ]
             if segment.volume is not None:
                 arguments.extend(['-af', f'volume={segment.volume}'])
+            if segment.title is not None:
+                arguments.extend(['-metadata', f'title={segment.title}'])
             if segment.metadata is not None:
                 for key, val in segment.metadata.items():
                     arguments.extend(['-metadata', f'{key}={Template(val).safe_substitute(substitutions)}'])

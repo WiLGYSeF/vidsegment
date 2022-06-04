@@ -26,6 +26,9 @@ class SegmentLoader:
             else:
                 end = float(segment['end'])
 
+            if start >= end:
+                raise ValueError(f'start must be less than end: {start} and {end}')
+
             segment_filename = segment.get('filename', filename_template)
             if segment_filename is None:
                 raise ValueError('no filename for segment')

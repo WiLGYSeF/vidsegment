@@ -3,7 +3,7 @@ import re
 def time_to_seconds(time: str) -> float:
     match = re.fullmatch(r'(?:(?:(?P<hours>[0-9]+):)?(?P<minutes>[0-5]?[0-9]):)?(?P<seconds>[0-5]?[0-9](?:\.[0-9]*)?)', time)
     if match is None:
-        raise ValueError('invalid time format')
+        raise ValueError(f'invalid time format: {time}')
 
     def _get(d: dict, key: str, default: str) -> str:
         result = d.get(key)
