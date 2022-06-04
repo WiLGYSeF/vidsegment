@@ -21,10 +21,6 @@ def main(args: List[str]):
             print(f'error: could not get ffmpeg version: {exc}')
         sys.exit(0)
 
-    if len(args) == 0:
-        argscli.print_help()
-        sys.exit(1)
-
     input_video = namespace.input
     input_segments = namespace.segment
     output_path = namespace.dest
@@ -39,9 +35,11 @@ def main(args: List[str]):
             output_path,
             segments,
             overwrite=namespace.overwrite,
-            copy_video=namespace.copy,
+            re_encode_video=namespace.re_encode,
+            decode_before_seek=namespace.decode_before_seek,
+            avoid_negative_ts=namespace.avoid_negative_ts,
             continue_on_fail=namespace.continue_on_fail,
-            verbose=namespace.verbose,
+            #verbose=namespace.verbose,
         ):
             if result.success:
                 print(result.filename)
