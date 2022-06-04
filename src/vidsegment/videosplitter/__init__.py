@@ -3,6 +3,7 @@ from string import Template
 import subprocess
 from typing import Dict, Generator, Iterable
 
+from ..filename_slug import FilenameSlug
 from ..segment import Segment
 from ..utils.seconds_to_time import seconds_to_time
 
@@ -33,8 +34,9 @@ class VideoSplitter:
         for segment in segments:
             substitutions = self._get_substitutions(segment, extension)
 
-            # TODO: legalize filenames?
-            dest_filename = Template(segment.filename).substitute(substitutions)
+            dest_filename = FilenameSlug().slug_filename(
+                Template(segment.filename).substitute(substitutions)
+            )
             dest_filepath = os.path.join(dest_path, dest_filename)
 
             # TODO: optimize?
