@@ -7,11 +7,12 @@ from ..utils.time_to_seconds import time_to_seconds
 
 class SegmentLoader:
     def load_yaml(self, filename: str) -> List[Segment]:
-        with open(filename, 'r') as file:
+        with open(filename, 'r', encoding='utf-8') as file:
             data = yaml.safe_load(file.read())
 
         filename_template = data.get('filename')
         volume = data.get('volume')
+        constant_rate_factor = data.get('constant_rate_factor')
         metadata = data.get('metadata')
 
         segments = []
@@ -37,12 +38,17 @@ class SegmentLoader:
             if segment_volume is not None:
                 segment_volume = str(segment_volume)
 
+            segment_constant_rate_factor = segment.get('constant_rate_factor', constant_rate_factor)
+            if segment_constant_rate_factor is not None:
+                segment_constant_rate_factor = int(segment_constant_rate_factor)
+
             segments.append(Segment(
                 start,
                 end,
                 segment_filename,
                 segment.get('title'),
                 segment_volume,
+                segment_constant_rate_factor,
                 segment.get('metadata', metadata),
             ))
 
