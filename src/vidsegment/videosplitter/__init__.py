@@ -60,7 +60,10 @@ class VideoSplitter:
                 ])
 
             if not re_encode_video:
-                arguments.extend(['-c', 'copy'])
+                if segment.volume is not None:
+                    arguments.extend(['-c:v', 'copy'])
+                else:
+                    arguments.extend(['-c', 'copy'])
             if avoid_negative_ts:
                 arguments.extend(['-avoid_negative_ts', '1'])
             if segment.volume is not None:
@@ -72,6 +75,8 @@ class VideoSplitter:
             if segment.metadata is not None:
                 for key, val in segment.metadata.items():
                     arguments.extend(['-metadata', f'{key}={Template(val).safe_substitute(substitutions)}'])
+
+            # TODO: segment artists, album
 
             arguments.append(dest_filepath)
 
